@@ -203,16 +203,43 @@ namespace GreenBasket.MobieApi
         [HttpPost]
         public async Task<IActionResult> CreateCustomer(Customer input)
         {
-            input.Status = true;
-            input.Date = DateTime.Now;
-            _context.Add(input);
-            await _context.SaveChangesAsync();
-            return Ok(new
+            try
             {
-                Response = "Create Success!!",
-                CustomerId = input.Id,
-            });
+                if (!IsExistcustomerbyNumber(input.Phone))
+                {
+                    input.Status = true;
+                    input.Date = DateTime.Now;
+                    _context.Add(input);
+                    await _context.SaveChangesAsync();
+                    return Ok(new { Customer = input, isCustomerCreated = true, msg = "Success!!", isExist = false });
 
+                }
+                return Ok(new { Customer = input, isCustomerCreated = false, msg = "Phone No already exists", isExist = true });
+
+            }catch(Exception ex)
+            {
+                return Ok(new { Customer = input, isCustomerCreated = false, msg = ex.Message, isExist = false });
+            }
+
+        }
+        [HttpGet]
+        public async Task<IActionResult> IsCustomerExist(string phone)
+        {
+            if (IsExistcustomerbyNumber(phone))
+            {
+                if(IsExistCustomer(phone))
+                    return Ok(new { Customer = _context.Customers.FirstOrDefault(a => a.Phone == phone), msg = "Success!!", isExist = true });
+                return Ok(new { msg="Phone No exist but Admin No Permition Contact Admin", isExist = true });
+            }
+            return Ok(new { msg="No Exist" ,isExist = false });
+        }
+        private  bool IsExistcustomerbyNumber(string phone)
+        {
+            return _context.Customers.Any(a=>a.Phone == phone);
+        }
+        private bool IsExistCustomer(string phone)
+        {
+            return _context.Customers.Any(a => a.Phone == phone && a.Status);
         }
         [HttpPost]
         public async Task<IActionResult> UpdateCustomer(Customer input)
@@ -239,17 +266,26 @@ namespace GreenBasket.MobieApi
         [HttpPost]
         public async Task<IActionResult> CreateOrder(Order input)
         {
-            input.Status = true;
-            input.Date = DateTime.Now;
-            _context.Add(input);
-            await _context.SaveChangesAsync();
-            return Ok(new
+            try
             {
-                Response = "Create Success!!",
-                OrderId = input.Id,
-                //OrderItems = input.OrderItems.Select(a=>a.Id).ToList()
-            });
+                input.Status = true;
+                input.Date = DateTime.Now;
+                _context.Add(input);
+                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    msg = "Order Created Success!!",
+                    IsCreated = true,
+                    OrderId = input.Id,
+                    //OrderItems = input.OrderItems.Select(a=>a.Id).ToList()
+                });
 
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { msg = ex.Message, IsCreated = false });
+            }
+           
         }
         [HttpPost]
         public async Task<IActionResult> UpdateOrder(Order input)
