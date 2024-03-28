@@ -296,10 +296,26 @@ namespace GreenBasket.MobieApi
             return Ok(input);
 
         }
-        public async Task<IActionResult> GetOrcerDetailById(long id)
+        public async Task<IActionResult> GetOrderById(long id)
         {
-            var data = await _context.Orders.Where(a => a.Id == id).FirstOrDefaultAsync();
+            var data = await _context.Orders.Where(a => a.Id == id).Include(a=>a.OrderItems).FirstOrDefaultAsync();
             return Ok(data);
+        }
+       
+        public async Task<IActionResult> GetCustomerOrder(long id)
+        {
+            var data = await _context.Orders.Where(a => a.CustomerId == id).Include(a=>a.OrderItems).ToListAsync();
+            return Ok(data);
+        }
+        public async Task<IActionResult> GetCustomerOrderStatusWise(long id)
+        {
+            var data = await _context.Orders.Where(a => a.CustomerId == id).Include(a=>a.OrderItems).ToListAsync();
+            var newList = new
+            {
+                CurrentOrders = data.Where(a => a.OrderStatus == OrderStatusEnum.Pending).ToList(),
+                PastOrders = data.Where(a => a.OrderStatus == OrderStatusEnum.Delivered || a.OrderStatus == OrderStatusEnum.Cancelled).ToList()
+            };
+            return Ok(newList);
         }
         public async Task<IActionResult> GetOrders()
         {

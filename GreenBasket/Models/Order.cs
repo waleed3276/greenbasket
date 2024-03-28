@@ -32,9 +32,19 @@ namespace GreenBasket.Models
         public double GSTAmount { get; set; }
         public double SubTotalAmount { get; set; }
         public double TotalAmunt { get; set; }
-
+        [Display(Name = "Order Status")]
+        public OrderStatusEnum OrderStatus { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public bool Status { get; set; }
         public DateTime Date { get; set; }
+    }
+    public enum OrderStatusEnum
+    {
+
+        Pending,
+        InProgress,
+        Shipped,
+        Delivered,
+        Cancelled
     }
 }
