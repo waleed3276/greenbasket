@@ -322,6 +322,18 @@ namespace GreenBasket.MobieApi
             var data = await _context.Orders.ToListAsync();
             return Ok(data);
         }
+        public async Task<IActionResult> ChangeOrderStatus(long id,string status)
+        {
+            var data = await _context.Orders.FirstOrDefaultAsync(a => a.Id == id);
+
+            if (data == null)
+                return BadRequest("Invalid Order Id");
+            var orderStatus = Enum.Parse<OrderStatusEnum>(status);
+            data.OrderStatus = orderStatus;
+            _context.Update(data);
+            _context.SaveChanges();
+            return Ok("Status Change");
+        }
         #endregion
 
         #region Order
